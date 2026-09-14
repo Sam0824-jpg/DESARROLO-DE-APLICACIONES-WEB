@@ -16,7 +16,7 @@
         $precioUnitario = 4500.50; 
         
         // 3. Un segundo dato numérico (cantidad en stock)
-        $cantidadStock = 12; 
+        $cantidadStock = 13;
         
         // 4. Una operación utilizando los datos anteriores
         $valorTotalInventario = $precioUnitario * $cantidadStock;
