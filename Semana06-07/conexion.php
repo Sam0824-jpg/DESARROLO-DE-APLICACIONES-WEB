@@ -3,7 +3,7 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 $servidor = "localhost";
 $usuario = "root";
-$password = ""; 
+$password = "root"; 
 $base_datos = "inventario_fyne";
 
 try {

@@ -1,6 +1,12 @@
 <?php 
 require_once "proteger.php";
 require_once "conexion.php"; 
+
+// Inicializamos la variable de búsqueda para usarla en el HTML
+$busqueda = "";
+if (isset($_GET['busqueda'])) {
+    $busqueda = trim($_GET['busqueda']);
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -39,6 +45,16 @@ require_once "conexion.php";
 
         <section class="seccion-tabla">
             <h2>Inventario Actual (READ / UPDATE / DELETE)</h2>
+            
+            <!-- NUEVO: Barra de Búsqueda -->
+            <form method="GET" action="" style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+                <input type="text" name="busqueda" placeholder="Buscar por nombre..." value="<?php echo htmlspecialchars($busqueda, ENT_QUOTES, 'UTF-8'); ?>" style="padding: 6px; width: 250px;">
+                <button type="submit" style="padding: 6px 15px; cursor: pointer;">Buscar</button>
+                <?php if (!empty($busqueda)): ?>
+                    <a href="panel.php" style="text-decoration: none; color: #dc3545;">Limpiar filtro</a>
+                <?php endif; ?>
+            </form>
+
             <table class="tabla-inventario">
                 <thead>
                     <tr>
@@ -50,8 +66,22 @@ require_once "conexion.php";
                 </thead>
                 <tbody>
                     <?php
-                    $sql = "SELECT * FROM productos ORDER BY id DESC";
-                    $stmt = $conexion->prepare($sql);
+                    // NUEVO: Lógica de SQL dinámica para la búsqueda
+                    if (!empty($busqueda)) {
+                        // Limpiamos las comas de lo que el usuario escribió
+                        $termino_limpio = str_replace(',', '', $busqueda);
+                        $parametro = "%" . $termino_limpio . "%";
+                        
+                        // Buscamos ignorando las comas en la base de datos
+                        $sql = "SELECT * FROM productos WHERE REPLACE(nombre, ',', '') LIKE ? ORDER BY id DESC";
+                        $stmt = $conexion->prepare($sql);
+                        $stmt->bind_param("s", $parametro);
+                    } else {
+                        // Si no hay búsqueda, mostramos todo como lo tenías originalmente
+                        $sql = "SELECT * FROM productos ORDER BY id DESC";
+                        $stmt = $conexion->prepare($sql);
+                    }
+
                     $stmt->execute();
                     $resultado = $stmt->get_result();
 
@@ -73,7 +103,7 @@ require_once "conexion.php";
                             echo "</tr>";
                         }
                     } else {
-                        echo "<tr><td colspan='4'>No hay productos registrados.</td></tr>";
+                        echo "<tr><td colspan='4'>No hay productos registrados que coincidan con la búsqueda.</td></tr>";
                     }
                     ?>
                 </tbody>
